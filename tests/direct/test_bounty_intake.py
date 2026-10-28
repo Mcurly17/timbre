@@ -35,10 +35,15 @@ def _message(sender, status="JUDGED", verdict="RELEVANT", inbox_id=0):
 
 
 def _patch(monkeypatch, contract, messages):
-    def read(message_id):
+    # Patch the contract class. The handle returned to the test is a
+    # calldata proxy, so type(contract) is not that class. Direct mode
+    # drops an attribute set on the instance before monkeypatch.undo.
+    real = object.__getattribute__(contract, "_instance")
+
+    def read(self, message_id):
         return messages[message_id]
 
-    monkeypatch.setattr(contract, "_read_message", read)
+    monkeypatch.setattr(type(real), "_read_message", read)
 
 
 def _fund(vm, contract, owner, amount):
