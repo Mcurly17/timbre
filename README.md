@@ -258,39 +258,38 @@ tests/direct/test_timbre.py::test_get_message_builds_the_forward_mock PASSED [10
 
 ## Live demo
 
-Not run yet. Fill this table from a Studionet run. The procedure, the pinned criteria URL, and the receipt rule are in [DEPLOY.md](DEPLOY.md). A row counts only when the receipt is `ACCEPTED` or `FINALIZED`, the consensus is `MAJORITY_AGREE` or `AGREE`, and execution is `FINISHED_WITH_RETURN` or `SUCCESS`. If a verdict differs from the expected column, write the label the chain returned. Do not rewrite the row.
+Studionet run. Unless a row says otherwise, the receipt is `ACCEPTED`, consensus is `MAJORITY_AGREE`, and execution is `SUCCESS`. The procedure is in [DEPLOY.md](DEPLOY.md).
 
-Timbre: `<CONTRACT_ADDRESS>`
+The first send of 01-good-report failed client-side because of a Studio read-decoder bug on payloads ≥ 256 bytes (see [docs/studio-rlp-bug.md](docs/studio-rlp-bug.md)); fixed in scripts by simulating as a write. That's why the good report is message 3, not 0.
 
-BountyIntake: `<CONTRACT_ADDRESS>`
+Timbre [0x41F2…db25](https://explorer-studio.genlayer.com/address/0x41F2559149cc987087A35d7c76f6cf002D49db25), deploy [0x25e9…a257](https://explorer-studio.genlayer.com/tx/0x25e91dfc0b2c677248df2611b6e2d1b23ff964597e73ab9b30de50e26ee2a257). Owner A [0xf5Fe…3dFF](https://explorer-studio.genlayer.com/address/0xf5Fe96d62733d40f25822b20C5E46A0E17483dFF). Sender B [0x7411…BC56](https://explorer-studio.genlayer.com/address/0x74115084812fc662AaAE47B5Fd4Ef60cd5E7BC56).
 
-| Step | Call | Tx | Expected verdict | Obtained verdict |
-|---|---|---|---|---|
-| deploy-timbre | `deploy-timbre` | `<TX_HASH>` | | |
-| open | `open` tinyparse inbox, pinned `demo/INBOX.md`, 0.01 to 0.1 GEN | `<TX_HASH>` | | |
-| send 0 | `send 0 demo/messages/01-good-report.md 0.01` | `<TX_HASH>` | | |
-| judge 0 | `judge 0` | `<TX_HASH>` | `RELEVANT` | |
-| send 1 | `send 0 demo/messages/02-ai-slop.md 0.01` | `<TX_HASH>` | | |
-| judge 1 | `judge 1` | `<TX_HASH>` | `SPAM` | |
-| send 2 | `send 0 demo/messages/03-spam.md 0.01` | `<TX_HASH>` | | |
-| judge 2 | `judge 2` | `<TX_HASH>` | `SPAM` | |
-| send 3 | `send 0 demo/messages/04-injection.md 0.01` | `<TX_HASH>` | | |
-| judge 3 | `judge 3` | `<TX_HASH>` | `SPAM` | |
-| send 4 | `send 0 demo/messages/05-off-topic.md 0.01` | `<TX_HASH>` | | |
-| judge 4 | `judge 4` | `<TX_HASH>` | `OFF_TOPIC` | |
-| withdraw A | `withdraw` as the inbox owner | `<TX_HASH>` | | |
-| withdraw B | `withdraw` as the sender | `<TX_HASH>` | | |
-| owner preview | `preview` of the owner messaging their own inbox; do not send value | | refused by `preview_send` | |
-| deploy-intake | `deploy-intake <CONTRACT_ADDRESS> 0` | `<TX_HASH>` | | |
-| fund | `fund 0.05` | `<TX_HASH>` | | |
-| forward | `forward 0` | `<TX_HASH>` | accepted, message is `RELEVANT` | |
-| award | `award 0 0.02` | `<TX_HASH>` | | |
-| intake-withdraw | `intake-withdraw` as the sender | `<TX_HASH>` | | |
-| forward spam | `forward 1` | | refused before submission | |
+Inbox 0, "tinyparse maintainers". URL stored on-chain: [demo/INBOX.md](https://raw.githubusercontent.com/Mcurly17/timbre/2cf7474e595935aec65d5619003c920c8c60c005/demo/INBOX.md), sha256 `ff6a8d558582ae27ac82dfb9eb24bf19ef55e0e7230acaa63f539f95c94521b1`.
 
-Studio import: `https://studio.genlayer.com/?import-contract=<CONTRACT_ADDRESS>`
+Same file on main: https://raw.githubusercontent.com/Mcurly17/timbre/9252ac77f47969f3ff0a35732d53e27c50452aee/demo/INBOX.md — identical sha256 (ff6a8d55…21b1). 2cf7474 is a pre-rewrite commit (history was later rewritten to drop Co-authored-by trailers), so it is no longer reachable from main; the digest stored on-chain is what the contract checks.
 
-Explorer: `https://explorer-studio.genlayer.com/address/<CONTRACT_ADDRESS>` and `https://explorer-studio.genlayer.com/tx/<TX_HASH>`
+BountyIntake [0x3fc0…3956](https://explorer-studio.genlayer.com/address/0x3fc03f1564989cEDF2D030B7871d262402943956) watches inbox 0. Deploy [0x807c…b5b5](https://explorer-studio.genlayer.com/tx/0x807c05dfaaeb8b4887fc3f2a43f05c0d0fe53b2fb3a677e9fcc22d9a31f4b5b5).
+
+| id | file | send | judge | verdict | payout |
+|---|---|---|---|---|---|
+| 0 | `demo/messages/02-ai-slop.md` | [0x6b33…80cf](https://explorer-studio.genlayer.com/tx/0x6b33f4a9f84a9d59985a4ab6bc36c9d08830da14456af960cc65d2444c0480cf) | [0x1d1d…28e3](https://explorer-studio.genlayer.com/tx/0x1d1d6f1ea0aa5a2acff1c71661625402e5f1c8312c45b12b2671d6364ad928e3) | `SPAM` (S2) | 100% to owner |
+| 1 | `demo/messages/03-spam.md` | [0xfc37…3f61](https://explorer-studio.genlayer.com/tx/0xfc3771ce912840cf65a53cc59a8f24dec3b251680e8a6c11b282d5b02b1f3f61) | [0x66b8…b76f](https://explorer-studio.genlayer.com/tx/0x66b8bd18a18c07a1a84ac6ea79df23d141f51d0a8a5b89b3dc6c5d534988b76f) | `SPAM` (S1) | 100% to owner |
+| 2 | `demo/messages/04-injection.md` | [0xdf60…6af3](https://explorer-studio.genlayer.com/tx/0xdf6063a9c9e98586ee6dc25bae0f7ad4851e80c5be3236fc7feec00eae9e6af3) | [0x32dc…1c4d](https://explorer-studio.genlayer.com/tx/0x32dc6c866a8b7bb41051cb39b030262df47f9e840c7a2ba51bb204de4a861c4d) | `SPAM` (S3, injection ignored) | 100% to owner |
+| 3 | `demo/messages/01-good-report.md` | [0x8761…8e34](https://explorer-studio.genlayer.com/tx/0x8761f35aa06d062a81c874bd19f7b508ec089ee0f64cb2097ee0d50a4c278e34) | [0x4307…ad48](https://explorer-studio.genlayer.com/tx/0x430793f8f15330f2eada88ca374557d76bc33d3500532a6f81894e1145dead48) | `RELEVANT` | refunded |
+| 4 | `demo/messages/05-off-topic.md` | [0x9230…78b8](https://explorer-studio.genlayer.com/tx/0x9230540e0abb6b6f6eeaf0832f5b1389a908f4f1660c88f2d051cc6df6da78b8) | [0xedbe…527b](https://explorer-studio.genlayer.com/tx/0xedbe0a060bd72281150da6e4c541443b2c51ce1b872b1286df6b6fbfb3b0527b) | `OFF_TOPIC` | 50/50 |
+
+Credits before withdrawal: owner A 0.035 GEN, sender B 0.015 GEN. That matches the rules for three `SPAM` stakes, one `RELEVANT` refund, and one `OFF_TOPIC` split. Withdraw A [0xc0cb…c106](https://explorer-studio.genlayer.com/tx/0xc0cb92a86b5aac2f910ce5fe1ea30ee63364f6864655eb8694d8bcfc60afc106). Withdraw B [0xb5dc…a345](https://explorer-studio.genlayer.com/tx/0xb5dc75d04eb254f1569def8ad92b70d8fabdbb460b4930785ae222a6b2e8a345).
+
+BountyIntake read Timbre on-chain. `forward` of message 3 (`RELEVANT`) [0x2f8f…d8cb](https://explorer-studio.genlayer.com/tx/0x2f8f211717976978b81b87c665bc93072f3679f81e33ea5f6ef78ab80327d8cb). `fund` 0.05 GEN [0x2d08…fcb1](https://explorer-studio.genlayer.com/tx/0x2d0818bba6b60cd4f8126ad10785b43be414db19cb8f62d6801a440b6c4bfcb1). `award` entry 0, 0.02 GEN [0x672e…c191](https://explorer-studio.genlayer.com/tx/0x672ef083a3b1cff9be7b2894adec4eb8b60795600b8be69d4e2da800e458c191). `intake-withdraw` by B [0x4caa…f5b0](https://explorer-studio.genlayer.com/tx/0x4caae078eb65c13472d66e50b27c5a14fcb769584b0e17e537cbae018eedf5b0). Final `intake-stats`: entries 1, pool 0.03 GEN, `total_credits` 0.
+
+### Refusals
+
+- Sending a 4th pending message (`05-off-topic.md`) was refused by the precheck: max 3 pending per sender per inbox. No transaction was sent.
+- Owner preview on their own inbox was refused: "owner cannot message own inbox". No transaction was sent.
+- `forward` of message 0 (`SPAM`) was refused before submission: the intake only accepts `JUDGED` + `RELEVANT`. No transaction was sent.
+- `award` with an empty pool reverted on-chain, execution `ERROR`: [0x2350…7dd3](https://explorer-studio.genlayer.com/tx/0x235041a48311719ea8b0f03260be2a9155df36ab5e2191de2f9753061d7b7dd3). `intake-withdraw` with zero credit also reverted, execution `ERROR`: [0x2d4f…a4b3](https://explorer-studio.genlayer.com/tx/0x2d4f8e8831351e43f3cea06c0e6f13a089771b1fae60928d37dddc21b43aa4b3).
+
+Studio import: [Timbre](https://studio.genlayer.com/?import-contract=0x41F2559149cc987087A35d7c76f6cf002D49db25), [BountyIntake](https://studio.genlayer.com/?import-contract=0x3fc03f1564989cEDF2D030B7871d262402943956).
 
 ## Credits
 
