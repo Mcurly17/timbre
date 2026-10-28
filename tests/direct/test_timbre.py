@@ -667,3 +667,45 @@ def test_pickling_and_calldata_roundtrip(direct_vm, contract, direct_alice, dire
         contract.inbox_stats(0),
     ):
         assert calldata.decode(calldata.encode(value)) == value
+
+
+def _forward_lookup_keys() -> set[str]:
+    """Keys BountyIntake.forward reads. Parsed, not imported: the runner allows one contract."""
+    import ast
+
+    tree = ast.parse((ROOT / "contracts" / "bounty_intake.py").read_text(encoding="utf-8"))
+    forward = next(
+        node for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "forward"
+    )
+    keys = set()
+    for call in ast.walk(forward):
+        if not isinstance(call, ast.Call) or not isinstance(call.func, ast.Attribute):
+            continue
+        if call.func.attr != "get" or not isinstance(call.func.value, ast.Name):
+            continue
+        if call.func.value.id != "message" or len(call.args) != 1:
+            continue
+        arg = call.args[0]
+        if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+            keys.add(arg.value)
+    return keys
+
+
+def test_get_message_builds_the_forward_mock(direct_vm, contract, direct_alice, direct_bob):
+    _open(direct_vm, contract, direct_alice)
+    _send(direct_vm, contract, direct_bob, TEXT, "", MIN_STAKE)
+    _mock_ok(direct_vm)
+    assert contract.judge(0) == "RELEVANT"
+
+    viewed = contract.get_message(0)
+    keys = _forward_lookup_keys()
+    assert keys == {"inbox_id", "status", "verdict", "sender"}
+    mock = {key: viewed[key] for key in keys}
+    assert isinstance(mock["inbox_id"], int) and not isinstance(mock["inbox_id"], bool)
+    assert mock["inbox_id"] == 0
+    assert mock["status"] == "JUDGED"
+    assert mock["verdict"] == "RELEVANT"
+    assert isinstance(mock["sender"], str)
+    assert re.fullmatch(r"0x[0-9a-fA-F]{40}", mock["sender"])
+    assert mock["sender"] == _hex(direct_bob)
