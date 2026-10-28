@@ -221,7 +221,12 @@ async function deploy(codePath: string, args: CalldataEncodable[]): Promise<void
   await settle(rpc, String(hash));
 }
 
-function previewProblem(value: unknown): string | null {
+export function plainPreview(value: unknown): unknown {
+  if (value instanceof Map) return Object.fromEntries(value);
+  return value;
+}
+
+export function previewProblem(value: unknown): string | null {
   const record = asRecord(value);
   if (!record) return "preview_send returned an unreadable result";
   const error = typeof record.error === "string" ? record.error : "";
@@ -230,7 +235,14 @@ function previewProblem(value: unknown): string | null {
 }
 
 async function loadPreview(inbox: number, text: string, textUrl: string, stake: bigint, from: string): Promise<unknown> {
-  return read(addressEnv("TIMBRE_CONTRACT"), "preview_send", [inbox, from, text, textUrl, stake]);
+  // Studio's read gen_call decoder drops list payloads of 256 bytes or more.
+  // A write-type simulation uses the normal RLP decoder and submits nothing.
+  const result = await client().simulateWriteContract({
+    address: addressEnv("TIMBRE_CONTRACT"),
+    functionName: "preview_send",
+    args: [inbox, from, text, textUrl, stake],
+  });
+  return plainPreview(result);
 }
 
 async function requireTipAllowed(messageId: number, from: string): Promise<void> {
@@ -319,9 +331,17 @@ async function main(argv: string[]): Promise<void> {
       if (problem) fail(`refusing to send, no value was submitted: ${problem}`);
       return transact(timbre(), "send_message", [inbox, text, textUrl], stake);
     }
-    case "judge":
+    case "judge": {
       need(1);
-      return transact(timbre(), "judge", [intArg(args[0], "message")]);
+      const messageId = intArg(args[0], "message");
+      await transact(timbre(), "judge", [messageId]);
+      const message = asRecord(await read(timbre(), "get_message", [messageId]));
+      show({
+        verdict: message && typeof message.verdict === "string" ? message.verdict : null,
+        status: message && typeof message.status === "string" ? message.status : null,
+      });
+      return;
+    }
     case "reclaim":
       need(1);
       return transact(timbre(), "reclaim", [intArg(args[0], "message")]);

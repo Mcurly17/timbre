@@ -174,6 +174,8 @@ No LLM. It pays only for a Timbre message that is already `JUDGED` and `RELEVANT
 5. The demo runs on Studionet only (gasless, simulated balances). There is no mainnet deployment.
 6. The cross-contract call is mocked in direct-mode tests (the runner allows one contract per process) and proven live on Studionet.
 
+Studio's read `gen_call` decoder (`decode_method_call_data`) mis-decodes payloads of 256 bytes or more, so `preview_send` goes through a write-type `gen_call` simulation, which does not create a transaction.
+
 ## Consumer example
 
 `BountyIntake` is a bounty queue that does not judge anything itself. `forward` reads Timbre and accepts a message only when that message is `JUDGED` and `RELEVANT` in the inbox this contract was constructed with. A second `forward` of the same message is refused, as is any other inbox, any other verdict, and anything still `PENDING` or `EXPIRED`.
