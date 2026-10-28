@@ -188,10 +188,8 @@ Direct tests run the contracts in memory. They do not need Studio, and they do n
 pip install -r requirements.txt
 pytest tests/direct -v
 npm ci
-node --test tests/script/
+npm test
 ```
-
-`package.json` has no `npm test` script. `npm run test:script` runs the same two files under `tests/script/`.
 
 Output of `pytest tests/direct -v` on this machine, 28 October 2026 (34 passed):
 

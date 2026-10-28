@@ -5,7 +5,8 @@
   "scripts": {
     "timbre": "node --env-file-if-exists=.env scripts/timbre.ts",
     "deploy": "genlayer deploy",
-    "test:script": "node --test tests/script/receipt.test.ts tests/script/no-private-key.test.ts"
+    "test": "node --test \"tests/script/*.test.ts\"",
+    "test:script": "node --test \"tests/script/*.test.ts\""
   },
   "devDependencies": {
     "genlayer-js": "1.1.8",
