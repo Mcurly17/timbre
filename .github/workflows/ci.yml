@@ -16,7 +16,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: genvm-lint check contracts/timbre.py contracts/bounty_intake.py
+      - run: genvm-lint check contracts/timbre.py
+      - run: genvm-lint check contracts/bounty_intake.py
 
   test-direct:
     name: Direct Mode Tests
