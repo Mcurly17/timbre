@@ -1,0 +1,15 @@
+{
+  "name": "timbre",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "timbre": "node --env-file-if-exists=.env scripts/timbre.ts",
+    "deploy": "genlayer deploy"
+  },
+  "devDependencies": {
+    "genlayer-js": "1.1.8",
+    "ethers": "^6",
+    "@inquirer/password": "^4",
+    "typescript": "^5"
+  }
+}

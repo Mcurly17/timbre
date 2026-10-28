@@ -1,0 +1,16 @@
+SPEC.md
+.env
+.env.*
+!.env.example
+*.keystore.json
+keypair.json
+*.pem
+.venv/
+__pycache__/
+.pytest_cache/
+.gltest_cache/
+artifacts/
+node_modules/
+.vscode/*
+.idea
+.DS_Store
